@@ -39,7 +39,7 @@ function Login() {
           🎬 Welcome Back
         </h2>
         <p className="text-gray-400 text-center mb-6">
-          Login to continue your movie journey
+          Login and continue your movie journey
         </p>
 
         {/* ❗ Error */}

@@ -79,7 +79,7 @@ router.delete("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Movie not found" });
     }
 
-    // Verify ownership
+    
     if (movie.user.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
     }

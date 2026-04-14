@@ -16,7 +16,7 @@ const Dashboard = () => {
         </h1>
 
         <p className="text-gray-400 mb-6">
-          Discover, save, and track your favorite movies
+          Discover, save, and track your favorite movie
         </p>
 
         {/* 🎥 Browse Movies */}

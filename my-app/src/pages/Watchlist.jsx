@@ -243,7 +243,7 @@ export default function Watchlist() {
         </button>
       </div>
 
-      {/* Results */}
+      {/* Result */}
       <h2 className="text-xl mb-3">Results</h2>
 
       {loadingResults ? (

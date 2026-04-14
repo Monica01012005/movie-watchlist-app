@@ -13,4 +13,5 @@ const watchlistSchema = new mongoose.Schema({
 
 watchlistSchema.index({ user: 1, imdbID: 1 }, { unique: true });
 
+
 module.exports = mongoose.model("Watchlist", watchlistSchema);

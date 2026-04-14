@@ -15,7 +15,7 @@ const authMiddleware = (req, res, next) => {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = {
-      id: verified.id || verified.userId // ✅ safe mapping
+      id: verified.id || verified.userId 
     };
 
     next();

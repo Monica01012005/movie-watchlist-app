@@ -78,7 +78,7 @@ function Register() {
           </div>
         )}
 
-        {/* Username */}
+        {/* Usernamee */}
         <input
           type="text"
           name="username"
