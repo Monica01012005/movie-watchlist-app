@@ -32,7 +32,6 @@ const registerUser = async (req, res) => {
 
 
 
-// POST: Login User
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
