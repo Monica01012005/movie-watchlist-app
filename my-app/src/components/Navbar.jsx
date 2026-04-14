@@ -18,6 +18,9 @@ function Navbar() {
       <Link to="/dashboard" className="hover:text-indigo-400 transition">
         Dashboard
       </Link>
+      <Link to="/watchlist" className="hover:text-indigo-400 transition">
+        Watchlist
+      </Link>
       <button onClick={handleLogout} className="hover:text-red-400 transition">
         Logout
       </button>

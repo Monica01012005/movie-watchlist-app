@@ -1,63 +1,97 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
-import axios from "../utils/api"; // or use axios directly
+import axios from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
       const res = await axios.post("/login", { username, password });
-      login(res.data.token); // set context + localStorage
-      alert("Login successful!");
+      login(res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      alert(err.response?.data?.msg || "Login failed");
+      setError(err.response?.data?.msg || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleLogin}
-      className="bg-white p-6 rounded-xl shadow-md space-y-4 w-96 mx-auto mt-20"
-    >
-      <h2 className="text-2xl font-bold text-center">Login</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        className="w-full p-2 border rounded"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        className="w-full p-2 border rounded"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button
-        type="submit"
-        className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
+      <form
+        onSubmit={handleLogin}
+        className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-sm"
       >
-        Login
-      </button>
-      <p className="text-center">
-        Don't have an account?{" "}
-        <span
-          className="text-green-500 cursor-pointer"
-          onClick={() => navigate("/register")}
+        {/* 🎬 Title */}
+        <h2 className="text-3xl font-bold text-center mb-2">
+          🎬 Welcome Back
+        </h2>
+        <p className="text-gray-400 text-center mb-6">
+          Login to continue your movie journey
+        </p>
+
+        {/* ❗ Error */}
+        {error && (
+          <div className="bg-red-500 text-white text-sm p-2 rounded mb-4 text-center">
+            {error}
+          </div>
+        )}
+
+        {/* Username */}
+        <input
+          type="text"
+          placeholder="Username"
+          className="w-full p-3 mb-3 bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        {/* Password */}
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-3 mb-4 bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {/* Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-3 rounded font-semibold transition ${
+            loading
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
         >
-          Register
-        </span>
-      </p>
-    </form>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        {/* Register */}
+        <p className="text-center text-gray-400 mt-5">
+          Don't have an account?{" "}
+          <span
+            className="text-green-400 cursor-pointer hover:underline"
+            onClick={() => navigate("/register")}
+          >
+            Register
+          </span>
+        </p>
+      </form>
+    </div>
   );
 }
 

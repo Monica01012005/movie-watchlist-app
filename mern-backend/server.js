@@ -4,11 +4,17 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
+// ✅ Existing routes
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/user', userRoutes);
+
+// ✅ ADD THIS 👇
+const watchlistRoutes = require('./routes/watchlistRoutes');
+app.use('/api/watchlist', watchlistRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
