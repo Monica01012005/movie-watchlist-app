@@ -15,13 +15,13 @@ export default function Watchlist() {
   const [loadingWatchlist, setLoadingWatchlist] = useState(true);
   const [loadingResults, setLoadingResults] = useState(true);
 
-  // ✅ Load token safely after mount
+  // Load token
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
   }, []);
 
-  // ✅ Load watchlist
+  // Load watchlist
   const loadWatchlist = async () => {
     if (!token) return;
 
@@ -43,7 +43,7 @@ export default function Watchlist() {
       setMovies(moviesArray);
       setWatchlistIds(new Set(moviesArray.map((m) => m.imdbID)));
     } catch (err) {
-      console.error("Watchlist error:", err);
+      console.error(err);
       setError("Server error");
       setMovies([]);
     } finally {
@@ -51,7 +51,7 @@ export default function Watchlist() {
     }
   };
 
-  // ✅ Load default movies
+  // Load default movies (full details)
   const loadDefaultMovies = async () => {
     try {
       const defaultMovies = [
@@ -74,14 +74,14 @@ export default function Watchlist() {
       const data = await Promise.all(promises);
       setResults(data.filter((m) => m && m.Title));
     } catch (err) {
-      console.error("Default movies error:", err);
+      console.error(err);
       setError("Failed to load movies");
     } finally {
       setLoadingResults(false);
     }
   };
 
-  // ✅ Run when token is ready
+  // Run when token is ready
   useEffect(() => {
     if (token) {
       loadWatchlist();
@@ -89,7 +89,7 @@ export default function Watchlist() {
     }
   }, [token]);
 
-  // ✅ Search movies
+  // 🔥 Search movies with full details
   const search = async () => {
     if (!query) return;
 
@@ -99,19 +99,34 @@ export default function Watchlist() {
       const res = await fetch(
         `https://www.omdbapi.com/?apikey=${OMDB}&s=${query}`
       );
-
       const data = await res.json();
 
-      setResults(data.Search || []);
+      if (!data.Search) {
+        setResults([]);
+        setError("No movies found");
+        return;
+      }
+
+      // Fetch full details for each result
+      const detailedMovies = await Promise.all(
+        data.Search.map((movie) =>
+          fetch(`https://www.omdbapi.com/?apikey=${OMDB}&i=${movie.imdbID}`)
+            .then((r) => r.json())
+            .catch(() => null)
+        )
+      );
+
+      setResults(detailedMovies.filter((m) => m && m.Title));
       setError("");
-    } catch {
+    } catch (err) {
+      console.error(err);
       setError("Search failed");
     } finally {
       setLoadingResults(false);
     }
   };
 
-  // ✅ Add movie
+  // Add movie
   const add = async (m) => {
     try {
       if (watchlistIds.has(m.imdbID)) {
@@ -120,11 +135,6 @@ export default function Watchlist() {
         return;
       }
 
-      const res = await fetch(
-        `https://www.omdbapi.com/?apikey=${OMDB}&i=${m.imdbID}`
-      );
-      const d = await res.json();
-
       const addRes = await fetch(`${BASE}/api/watchlist`, {
         method: "POST",
         headers: {
@@ -132,12 +142,12 @@ export default function Watchlist() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          imdbID: d.imdbID,
-          title: d.Title,
-          year: d.Year,
-          poster: d.Poster,
-          rating: d.imdbRating,
-          plot: d.Plot,
+          imdbID: m.imdbID,
+          title: m.Title,
+          year: m.Year,
+          poster: m.Poster,
+          rating: m.imdbRating,
+          plot: m.Plot,
         }),
       });
 
@@ -156,7 +166,7 @@ export default function Watchlist() {
     }
   };
 
-  // ✅ Toggle watched
+  // Toggle watched
   const toggle = async (id) => {
     try {
       const res = await fetch(`${BASE}/api/watchlist/${id}`, {
@@ -173,13 +183,13 @@ export default function Watchlist() {
 
       loadWatchlist();
     } catch (err) {
-      console.error("Toggle error:", err);
+      console.error(err);
       setError("Update failed");
       setTimeout(() => setError(""), 2000);
     }
   };
 
-  // ✅ Remove movie
+  // Remove movie
   const remove = async (id) => {
     try {
       const res = await fetch(`${BASE}/api/watchlist/${id}`, {
@@ -196,13 +206,12 @@ export default function Watchlist() {
 
       loadWatchlist();
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error(err);
       setError("Delete failed");
       setTimeout(() => setError(""), 2000);
     }
   };
 
-  // ❌ If no token
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -252,7 +261,14 @@ export default function Watchlist() {
                 alt={m.Title}
                 className="h-64 w-full object-cover"
               />
-              <p className="text-sm">{m.Title}</p>
+
+              <p className="font-bold">{m.Title}</p>
+              <p className="text-sm text-gray-400">{m.Year}</p>
+              <p className="text-yellow-400">⭐ {m.imdbRating}</p>
+
+              <p className="text-xs mt-1 line-clamp-3">
+                {m.Plot}
+              </p>
 
               <button
                 onClick={() => add(m)}
@@ -263,9 +279,7 @@ export default function Watchlist() {
                     : "bg-green-600"
                 }`}
               >
-                {watchlistIds.has(m.imdbID)
-                  ? "Added"
-                  : "Add"}
+                {watchlistIds.has(m.imdbID) ? "Added" : "Add"}
               </button>
             </div>
           ))}
@@ -292,6 +306,9 @@ export default function Watchlist() {
               />
 
               <h3>{m.title}</h3>
+              <p className="text-sm text-gray-400">{m.year}</p>
+              <p className="text-yellow-400">⭐ {m.rating}</p>
+              <p className="text-xs mt-1">{m.plot}</p>
 
               <button
                 onClick={() => toggle(m._id)}
