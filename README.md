@@ -94,13 +94,6 @@ npm run dev
 4. Add/remove movies from watchlist  
 5. Data is stored in MongoDB  
 
----
-
-## 📸 Screenshots (Optional)
-
-Add screenshots here
-
----
 
 ## 🤝 Contributing
 
